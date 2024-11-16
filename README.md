@@ -41,8 +41,8 @@ Este projeto é uma solução para a otimização de rotas de coleta de dados ut
 
 1. Clone este repositório:
    ```bash
-   git clone https://github.com/seu_usuario/seu_repositorio.git
-   cd seu_repositorio
+   git clone https://github.com/hijao08/UNIBRASIL-Maps.git
+   cd UNIBRASIL-Maps
 
 2. Instale as dependências:
 
