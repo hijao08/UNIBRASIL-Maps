@@ -1,52 +1,78 @@
-from algoritmo_genetico import algoritmo_genetico
-from utils import salvar_rota_completa
+import numpy as np
+import random
+from fitness import calculate_fitness, calculate_distance, select_parents
+from crossover_mutation import crossover, mutate
+from population import generate_population
+from io_operations import load_coordinates, export_results_to_csv
+from plotting import plot_route
 
-# Configurações
-ARQUIVO_COORDENADAS = "coordenadas.csv"
-ARQUIVO_SAIDA = "rota_completa.csv"
-AUTONOMIA = 1800  # segundos
-VELOCIDADE_BASE = 30  # km/h
-VENTOS = -4.22  # km/h
-MAX_HORAS_VOO_DIARIO = 13 * 3600  # 06:00 às 19:00
+def run_single_population():
+    pop_size = 50
+    coordinates = load_coordinates('coordenadas.csv')
+    points = list(coordinates.keys())
+    start_point = points[0]
+    population = generate_population(pop_size, points, start_point)
+    
+    best_overall_distance = float('inf')
+    best_overall_route = None
+    best_overall_time = float('inf')
+    best_route_status = None
+    
+    generations_without_improvement = 0
+    max_generations_without_improvement = 100
+    
+    for generation in range(1000):
+        fitnesses = [calculate_fitness(route, coordinates) for route in population]
+        best_idx = np.argmax(fitnesses)
+        best_route = population[best_idx]
+        best_distance, best_time, route_status = calculate_distance(best_route, coordinates)
+        
+        if best_distance < best_overall_distance:
+            best_overall_distance = best_distance
+            best_overall_route = best_route.copy()
+            best_overall_time = best_time
+            best_route_status = route_status
+            generations_without_improvement = 0
+        else:
+            generations_without_improvement += 1
+        
+        print(f"\rGeração {generation + 1}: Distância = {best_distance:.2f} km, Tempo = {best_time:.2f} h", end="")
+        
+        if generations_without_improvement >= max_generations_without_improvement:
+            print(f"\nParando após {generation} gerações sem melhoria.")
+            break
+        
+        elite_size = int(pop_size * 0.1)
+        elite = sorted(zip(population, fitnesses), key=lambda x: x[1], reverse=True)[:elite_size]
+        elite = [x[0] for x in elite]
+        
+        new_population = elite.copy()
+        
+        while len(new_population) < pop_size:
+            parent1 = select_parents(population, fitnesses)
+            parent2 = select_parents(population, fitnesses)
+            child1, child2 = crossover(parent1, parent2)
+            
+            if random.random() < 0.10:
+                mutate(child1)
+            if random.random() < 0.10:
+                mutate(child2)
+                
+            new_population.extend([child1, child2])
+        
+        population = new_population[:pop_size]
+    
+    print("\n\nResultados Finais:")
+    print(f"Melhor distância encontrada: {best_overall_distance:.2f} km")
+    print(f"Tempo total estimado: {best_overall_time:.2f} horas ({best_overall_time*60:.1f} minutos)")
+    
+    total_days = best_overall_time // 24
+    remaining_hours = best_overall_time % 24
+    print(f"Total de dias: {int(total_days)} e {remaining_hours:.2f} horas restantes")
+    
+    export_results_to_csv(best_overall_route, best_distance, best_time, coordinates, best_route_status)
+    plot_route(coordinates, best_overall_route, "Melhor Resultado")
 
-def carregar_coordenadas(arquivo):
-    """
-    Carrega as coordenadas a partir do arquivo CSV.
-    """
-    import csv
-    coordenadas = []
-    with open(arquivo, 'r') as f:
-        leitor = csv.DictReader(f)
-        print(f"Colunas detectadas no CSV: {leitor.fieldnames}")
-        for linha in leitor:
-            coordenadas.append({
-                "cep": linha["cep"],
-                "latitude": float(linha["latitude"]),
-                "longitude": float(linha["longitude"])
-            })
-    return coordenadas
-
-# Carregar coordenadas
-coordenadas = carregar_coordenadas(ARQUIVO_COORDENADAS)
-
-# Configuração do algoritmo genético
-parametros_algoritmo = {
-    "tamanho_populacao": 100,
-    "num_geracoes": 50,
-    "taxa_mutacao": 0.1,
-    "tamanho_elite": 5
-}
-
-# Executar algoritmo genético
-melhor_rota_indices = algoritmo_genetico(coordenadas, parametros_algoritmo)
-
-# Construir rota completa
-rota_completa = [coordenadas[i] for i in melhor_rota_indices]
-
-# Criar lista de dias para o voo (exemplo simples, pode ser ajustado)
-dia_do_voo = [1] * len(rota_completa)  # Ajustar para calcular dias reais se necessário
-
-# Salvar rota completa
-salvar_rota_completa(rota_completa, ARQUIVO_SAIDA, dia_do_voo)
-
-print(f"Rota completa salva em {ARQUIVO_SAIDA}")
+# Executar o algoritmo
+if __name__ == "__main__":
+    run_single_population() 
