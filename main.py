@@ -65,15 +65,16 @@ def run_single_population():
         
         population = new_population[:pop_size]
     
+    # Calcula o número de dias de operação com base nos eventos registrados
+    dias_de_operacao = max(status['dia'] for status in best_route_status)
+    
     # Mostra resultados finais
     print("\n\nResultados Finais:")
     print(f"Melhor distância encontrada: {best_overall_distance:.2f} km")
     print(f"Tempo total estimado: {best_overall_time:.2f} horas ({best_overall_time*60:.1f} minutos)")
     
-    # Cálculo de dias
-    total_days = best_overall_time // 24  # Converte horas em dias
-    remaining_hours = best_overall_time % 24  # Horas restantes
-    print(f"Total de dias: {int(total_days)} e {remaining_hours:.2f} horas restantes")
+    # Ajuste para mostrar o número de dias de operação
+    print(f"Total de dias de operação: {dias_de_operacao}")
     
     # Exporta os resultados
     export_results_to_csv(best_overall_route, best_distance, best_time, coordinates, best_route_status)
