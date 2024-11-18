@@ -15,14 +15,16 @@ def export_results_to_csv(best_route, best_distance, best_time, coordinates, rou
     with open(filename, 'w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         
+        # Resumo geral
         writer.writerow(['=== RESUMO GERAL ==='])
         writer.writerow(['Distância Total (km)', 'Tempo Total (h)', 'Tempo Total (min)'])
         writer.writerow([round(best_distance, 2), round(best_time, 2), round(best_time * 60, 2)])
         writer.writerow([])
         
+        # Detalhes da rota
         writer.writerow(['=== DETALHES DA ROTA ==='])
         writer.writerow(['Ordem', 'Ponto', 'Latitude', 'Longitude', 'Distância até próximo (km)', 
-                        'Tempo até próximo (s)', 'Bateria Restante (s)', 'Ação', 'Horário'])
+                        'Tempo até próximo (s)', 'Bateria Restante (s)', 'Ação', 'Horário', 'Dia'])
         
         for i, status in enumerate(route_status):
             lat, lon = coordinates[status['ponto']]
@@ -35,7 +37,8 @@ def export_results_to_csv(best_route, best_distance, best_time, coordinates, rou
                 round(status['tempo_ate_proximo'], 2),
                 round(status['bateria_restante'], 2),
                 status['acao'],
-                status['horario']
+                status['horario'],
+                status['dia']
             ])
     
     print(f"\nResultados exportados para: {filename}")

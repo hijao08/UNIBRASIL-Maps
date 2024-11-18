@@ -14,8 +14,10 @@ def calculate_distance(route, coordinates):
     
     # Hora inicial do drone
     current_time = datetime.strptime("06:00", "%H:%M")
+    current_day = current_time.date()  # Armazena o dia atual
     
-    for i in range(len(route_coords)):
+    i = 0  # Índice do ponto atual
+    while i < len(route_coords):
         point1 = route_coords[i]
         point2 = route_coords[(i + 1) % len(route_coords)]
         
@@ -32,9 +34,10 @@ def calculate_distance(route, coordinates):
                 'ponto': route[i],
                 'acao': 'POUSO PARA RECARGA',
                 'bateria_restante': battery_time,
-                'distancia_ate_proximo': 0,
-                'tempo_ate_proximo': 0,
-                'horario': current_time.strftime("%H:%M")
+                'distancia_ate_proximo': 0,  # Não há distância até o próximo ponto se pousar
+                'tempo_ate_proximo': 0,  # Não há tempo até o próximo ponto se pousar
+                'horario': current_time.strftime("%H:%M"),  # Adiciona horário
+                'dia': current_day.day  # Armazena apenas o número do dia
             })
             battery_time = 1800  # Recarrega bateria
         
@@ -42,19 +45,29 @@ def calculate_distance(route, coordinates):
         battery_time -= time_to_next
         
         # Atualiza o tempo atual
-        current_time += timedelta(seconds=time_to_next)
+        new_time = current_time + timedelta(seconds=time_to_next)
         
-        # Verifica se o drone precisa pousar ao atingir 19h
-        if current_time.hour >= 19:
+        # Verifica se o novo tempo ultrapassa 19h
+        if new_time.hour >= 19:
+            # Pousa e espera até as 6h do dia seguinte
             route_status.append({
                 'ponto': route[i],
                 'acao': 'POUSO NOTURNO',
                 'bateria_restante': battery_time,
                 'distancia_ate_proximo': 0,
                 'tempo_ate_proximo': 0,
-                'horario': current_time.strftime("%H:%M")
+                'horario': current_time.strftime("%H:%M"),  # Adiciona horário
+                'dia': current_day.day  # Armazena apenas o número do dia
             })
+            # Recarrega a bateria ao pousar à noite
+            battery_time = 1800  # Recarrega bateria
+            # Espera até as 6h do dia seguinte
             current_time = current_time.replace(hour=6, minute=0) + timedelta(days=1)
+            current_day = current_time.date()  # Atualiza o dia
+            continue  # Retorna ao início do loop para continuar a partir do último ponto
+        
+        # Atualiza o tempo atual
+        current_time = new_time
         
         route_status.append({
             'ponto': route[i],
@@ -62,11 +75,15 @@ def calculate_distance(route, coordinates):
             'tempo_ate_proximo': time_to_next,
             'bateria_restante': battery_time,
             'acao': 'FOTO',
-            'horario': current_time.strftime("%H:%M")
+            'horario': current_time.strftime("%H:%M"),  # Adiciona horário
+            'dia': current_day.day  # Armazena apenas o número do dia
         })
         
         total_distance += distance
-        total_time += (time_to_next + 60) / 3600
+        total_time += (time_to_next + 60) / 3600  # Converte para horas
+        
+        # Avança para o próximo ponto
+        i += 1
     
     return total_distance, total_time, route_status
 

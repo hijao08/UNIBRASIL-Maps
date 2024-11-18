@@ -7,6 +7,7 @@ from io_operations import load_coordinates, export_results_to_csv
 from plotting import plot_route
 
 def run_single_population():
+    # Configurações iniciais
     pop_size = 50
     coordinates = load_coordinates('coordenadas.csv')
     points = list(coordinates.keys())
@@ -21,7 +22,7 @@ def run_single_population():
     generations_without_improvement = 0
     max_generations_without_improvement = 100
     
-    for generation in range(1000):
+    for generation in range(100):
         fitnesses = [calculate_fitness(route, coordinates) for route in population]
         best_idx = np.argmax(fitnesses)
         best_route = population[best_idx]
@@ -42,12 +43,14 @@ def run_single_population():
             print(f"\nParando após {generation} gerações sem melhoria.")
             break
         
+        # Elitismo - mantém os melhores 10%
         elite_size = int(pop_size * 0.1)
         elite = sorted(zip(population, fitnesses), key=lambda x: x[1], reverse=True)[:elite_size]
         elite = [x[0] for x in elite]
         
         new_population = elite.copy()
         
+        # Gera nova população
         while len(new_population) < pop_size:
             parent1 = select_parents(population, fitnesses)
             parent2 = select_parents(population, fitnesses)
@@ -62,15 +65,20 @@ def run_single_population():
         
         population = new_population[:pop_size]
     
+    # Mostra resultados finais
     print("\n\nResultados Finais:")
     print(f"Melhor distância encontrada: {best_overall_distance:.2f} km")
     print(f"Tempo total estimado: {best_overall_time:.2f} horas ({best_overall_time*60:.1f} minutos)")
     
-    total_days = best_overall_time // 24
-    remaining_hours = best_overall_time % 24
+    # Cálculo de dias
+    total_days = best_overall_time // 24  # Converte horas em dias
+    remaining_hours = best_overall_time % 24  # Horas restantes
     print(f"Total de dias: {int(total_days)} e {remaining_hours:.2f} horas restantes")
     
+    # Exporta os resultados
     export_results_to_csv(best_overall_route, best_distance, best_time, coordinates, best_route_status)
+    
+    # Plota a melhor rota encontrada
     plot_route(coordinates, best_overall_route, "Melhor Resultado")
 
 # Executar o algoritmo
