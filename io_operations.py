@@ -6,39 +6,51 @@ def load_coordinates(filename):
     df = pd.read_csv(filename)
     print("Colunas disponíveis:", list(df.columns))
     coordinates = {i: (row['latitude'], row['longitude']) for i, row in df.iterrows()}
-    return coordinates
+    ceps = {i: int(row['cep']) for i, row in df.iterrows()}
+    return coordinates, ceps
 
-def export_results_to_csv(best_route, best_distance, best_time, coordinates, route_status):
+def export_results_to_csv(best_route, best_distance, best_time, coordinates, route_status, ceps):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f'resultados_rota_{timestamp}.csv'
     
     with open(filename, 'w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         
-        # Resumo geral
-        writer.writerow(['=== RESUMO GERAL ==='])
-        writer.writerow(['Distância Total (km)', 'Tempo Total (h)', 'Tempo Total (min)'])
-        writer.writerow([round(best_distance, 2), round(best_time, 2), round(best_time * 60, 2)])
-        writer.writerow([])
+        # Cabeçalho
+        writer.writerow(['CEP inicial', 'Latitude inicial', 'Longitude inicial', 
+                        'Dia do vôo', 'Hora inicial', 'Velocidade', 
+                        'CEP final', 'Latitude final', 'Longitude final',
+                        'Pouso', 'Hora final'])
         
-        # Detalhes da rota
-        writer.writerow(['=== DETALHES DA ROTA ==='])
-        writer.writerow(['Ordem', 'Ponto', 'Latitude', 'Longitude', 'Distância até próximo (km)', 
-                        'Tempo até próximo (s)', 'Bateria Restante (s)', 'Ação', 'Horário', 'Dia'])
-        
-        for i, status in enumerate(route_status):
-            lat, lon = coordinates[status['ponto']]
+        # Para cada ponto na rota (exceto o último)
+        for i in range(len(route_status) - 1):
+            current_point = route_status[i]
+            next_point = route_status[i + 1]
+            
+            # Obtém coordenadas do ponto atual
+            lat_inicial, lon_inicial = coordinates[current_point['ponto']]
+            # Obtém coordenadas do próximo ponto
+            lat_final, lon_final = coordinates[next_point['ponto']]
+            
+            # Determina se houve pouso
+            pouso = "SIM" if current_point['acao'] in ['POUSO PARA RECARGA', 'POUSO NOTURNO'] else "NÃO"
+            
+            # Usa os CEPs reais em vez dos índices
+            cep_inicial = ceps[current_point['ponto']]
+            cep_final = ceps[next_point['ponto']]
+            
             writer.writerow([
-                i + 1,
-                status['ponto'],
-                lat,
-                lon,
-                round(status['distancia_ate_proximo'], 2),
-                round(status['tempo_ate_proximo'], 2),
-                round(status['bateria_restante'], 2),
-                status['acao'],
-                status['horario'],
-                status['dia']
+                cep_inicial,  # CEP inicial real
+                lat_inicial,
+                lon_inicial,
+                current_point['dia'],
+                current_point['horario'],
+                54,  # Velocidade fixa em 54 km/h
+                cep_final,  # CEP final real
+                lat_final,
+                lon_final,
+                pouso,
+                next_point['horario']
             ])
     
     print(f"\nResultados exportados para: {filename}")

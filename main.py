@@ -9,7 +9,7 @@ from plotting import plot_route
 def run_single_population():
     # Configurações iniciais
     pop_size = 50
-    coordinates = load_coordinates('coordenadas.csv')
+    coordinates, ceps = load_coordinates('coordenadas.csv')
     points = list(coordinates.keys())
     start_point = points[0]
     population = generate_population(pop_size, points, start_point)
@@ -20,9 +20,9 @@ def run_single_population():
     best_route_status = None
     
     generations_without_improvement = 0
-    max_generations_without_improvement = 100
+    max_generations_without_improvement = 1000
     
-    for generation in range(100):
+    for generation in range(1000):
         fitnesses = [calculate_fitness(route, coordinates) for route in population]
         best_idx = np.argmax(fitnesses)
         best_route = population[best_idx]
@@ -76,8 +76,9 @@ def run_single_population():
     # Ajuste para mostrar o número de dias de operação
     print(f"Total de dias de operação: {dias_de_operacao}")
     
-    # Exporta os resultados
-    export_results_to_csv(best_overall_route, best_distance, best_time, coordinates, best_route_status)
+    # Exporta os resultados usando os CEPs
+    export_results_to_csv(best_overall_route, best_overall_distance, best_overall_time, 
+                         coordinates, best_route_status, ceps)  # Adicionado ceps aqui
     
     # Plota a melhor rota encontrada
     plot_route(coordinates, best_overall_route, "Melhor Resultado")
