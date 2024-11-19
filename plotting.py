@@ -1,6 +1,9 @@
 import matplotlib.pyplot as plt
 
 def plot_route(coordinates, route, generation):
+    if not route:  # Verifica se a rota está vazia
+        raise ValueError("A rota não pode estar vazia.")
+    
     lats = [coordinates[point][0] for point in route]
     lons = [coordinates[point][1] for point in route]
     

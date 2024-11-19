@@ -9,7 +9,7 @@ from plotting import plot_route
 def run_single_population():
     # Configurações iniciais
     pop_size = 50
-    coordinates, ceps = load_coordinates('coordenadas.csv')
+    coordinates, ceps = load_coordinates('csv/coordenadas.csv')
     points = list(coordinates.keys())
     start_point = points[0]
     population = generate_population(pop_size, points, start_point)
@@ -56,9 +56,9 @@ def run_single_population():
             parent2 = select_parents(population, fitnesses)
             child1, child2 = crossover(parent1, parent2)
             
-            if random.random() < 0.10:
+            if random.random() < 0.5:
                 mutate(child1)
-            if random.random() < 0.10:
+            if random.random() < 0.5:
                 mutate(child2)
                 
             new_population.extend([child1, child2])

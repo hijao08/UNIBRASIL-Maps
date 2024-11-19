@@ -10,6 +10,9 @@ def load_coordinates(filename):
     return coordinates, ceps
 
 def export_results_to_csv(best_route, best_distance, best_time, coordinates, route_status, ceps):
+    if not best_route:  # Verifica se a rota está vazia
+        raise ValueError("A rota não pode estar vazia.")
+    
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f'resultados_rota_{timestamp}.csv'
     

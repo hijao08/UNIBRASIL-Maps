@@ -92,7 +92,7 @@ def calculate_fitness(route, coordinates):
     return 1.0 / (1.0 + distance + time * 60)
 
 def select_parents(population, fitness_scores):
-    tournament_size = 5
+    tournament_size = min(5, len(population))  # Garante que o tamanho do torneio não exceda a população
     population_with_fitness = list(zip(fitness_scores, population))
     tournament = random.sample(population_with_fitness, tournament_size)
-    return max(tournament, key=lambda x: x[0])[1] 
+    return max(tournament, key=lambda x: x[0])[1]

@@ -1,6 +1,9 @@
 import random
 
 def generate_population(size, points, start_point):
+    if not points:  # Verifica se não há pontos disponíveis
+        return []  # Retorna uma população vazia
+    
     available_points = [p for p in points if p != start_point]
     population = []
     

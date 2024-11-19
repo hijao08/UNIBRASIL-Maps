@@ -1,7 +1,14 @@
 import random
 
 def crossover(parent1, parent2):
+    if len(parent1) < 2 or len(parent2) < 2:
+        raise ValueError("Os pais devem ter pelo menos dois elementos para realizar o crossover.")
+    
     start_point = parent1[0]
+    
+    if parent1 == parent2:
+        return parent1.copy(), parent2.copy()
+    
     cut = random.randint(1, len(parent1) - 2)
     
     child1 = [start_point] + parent1[1:cut] + [x for x in parent2[1:-1] if x not in parent1[1:cut]]
