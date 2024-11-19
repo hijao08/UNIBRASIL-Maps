@@ -1,6 +1,7 @@
 import random
 
 def crossover(parent1, parent2):
+    """Realiza o crossover entre dois pais para gerar dois filhos."""
     if len(parent1) < 2 or len(parent2) < 2:
         raise ValueError("Os pais devem ter pelo menos dois elementos para realizar o crossover.")
     
@@ -20,5 +21,6 @@ def crossover(parent1, parent2):
     return child1, child2
 
 def mutate(route):
+    """Realiza uma mutação em uma rota trocando dois pontos."""
     i, j = random.sample(range(1, len(route) - 1), 2)
     route[i], route[j] = route[j], route[i] 

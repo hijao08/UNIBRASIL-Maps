@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 
 def plot_route(coordinates, route, generation):
+    """Plota a rota do drone em um gráfico."""
     if not route:  # Verifica se a rota está vazia
         raise ValueError("A rota não pode estar vazia.")
     

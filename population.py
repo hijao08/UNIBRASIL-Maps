@@ -1,6 +1,7 @@
 import random
 
 def generate_population(size, points, start_point):
+    """Gera uma população inicial de rotas."""
     if not points:  # Verifica se não há pontos disponíveis
         return []  # Retorna uma população vazia
     

@@ -88,6 +88,7 @@ def calculate_distance(route, coordinates):
     return total_distance, total_time, route_status
 
 def calculate_fitness(route, coordinates):
+    """Calcula a fitness de uma rota com base na distância e no tempo."""
     distance, time, route_status = calculate_distance(route, coordinates)
     return 1.0 / (1.0 + distance + time * 60)
 

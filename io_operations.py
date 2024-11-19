@@ -1,6 +1,6 @@
 import pandas as pd
 import csv
-from datetime import datetime
+from datetime import datetime, timedelta
 
 def load_coordinates(filename):
     df = pd.read_csv(filename)
@@ -42,12 +42,15 @@ def export_results_to_csv(best_route, best_distance, best_time, coordinates, rou
             cep_inicial = ceps[current_point['ponto']]
             cep_final = ceps[next_point['ponto']]
             
+            # Atualiza o horário inicial para adicionar 1 minuto
+            hora_inicial = datetime.strptime(current_point['horario'], "%H:%M") + timedelta(minutes=1)
+            
             writer.writerow([
                 cep_inicial,  # CEP inicial real
                 lat_inicial,
                 lon_inicial,
                 current_point['dia'],
-                current_point['horario'],
+                hora_inicial.strftime("%H:%M"),  # Formata o horário inicial com 1 minuto a mais
                 54,  # Velocidade fixa em 54 km/h
                 cep_final,  # CEP final real
                 lat_final,

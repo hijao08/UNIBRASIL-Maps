@@ -20,9 +20,9 @@ def run_single_population():
     best_route_status = None
     
     generations_without_improvement = 0
-    max_generations_without_improvement = 1000
+    max_generations_without_improvement = 100
     
-    for generation in range(1000):
+    for generation in range(100):
         fitnesses = [calculate_fitness(route, coordinates) for route in population]
         best_idx = np.argmax(fitnesses)
         best_route = population[best_idx]
